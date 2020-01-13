@@ -1,0 +1,74 @@
+# -*- coding:UTF-8 -*-
+# Author:M9KJ-TEAM
+# Product functions, sensitive files found, illegal files, illegal files, attack tools, etc.
+import os
+import re
+# 公共变量区域：
+patternlist = ['数据','DDOS','CC攻击','攻击软件','攻击器','data{4}','备份','源码','拿站','shell{5}','入侵','拿下','sj{2}','shuju{5}','秘密','密码','出售','辅助','0day{4}','犯罪','黄色','赌博','复现','攻击','恶意程序','病毒','预警','侵入','木马']
+# 匹配风险字符
+def reit(content,vol,dir):
+    for pattern in patternlist:
+        # -------------------------------------------
+        nopattern_except_one = '\w+\.\w+\.'
+        nopattern_except_two = '\w+\.\w+\.\w+'
+        nopattern_except_three = '\.\w+\.\w+'
+        nopattern_except_four = r'\\'
+        # -------------------------------------------
+        pattern = pattern
+        patterndirs = '\w+\.\w+'
+        # -------------------------------------------
+        nomatch_except_one = re.search(nopattern_except_one,content)
+        nomatch_except_two = re.search(nopattern_except_two,content)
+        nomatch_except_three = re.search(nopattern_except_three,content)
+        nomatch_except_four = re.search(nopattern_except_four,content)
+        # -------------------------------------------
+        matchdirs = re.search(patterndirs,content)
+        # -------------------------------------------
+        if matchdirs and not nomatch_except_one and not nomatch_except_two and not nomatch_except_three and not nomatch_except_four:
+            match = re.search(pattern,content)
+            if match:
+                otherpattern = '(\w+\.)(gif|data|mof|dll|xrm-ms|png|pyd|jpg|eot|font|woff|otf|ttf|idl|h|cpp)'
+                matchothers = re.search(otherpattern,content)
+                if matchothers:
+                    pass
+                else:
+                    print('存在风险文件：%s,盘符：%s,父目录：%s' % (content, vol, dir))
+                    with open('Risk.csv', 'a+') as f:
+                        f.write('存在风险文件：%s,盘符：%s,父目录：%s' % (content, vol, dir))
+                        f.write('\n')
+                        f.close()
+            else:
+                pass
+        else:
+            pass
+# 开始扫描
+def findsonmethings():
+    # 遍历字母A到Z，忽略光驱的盘符
+    for i in range(65, 91):
+        vol = chr(i) + ':'
+        if os.path.isdir(vol):
+            print('正在进行%s盘敏感文件扫描...'%(vol))
+            ss = os.walk(vol + '\\')
+            for perlist in ss:
+                if type(perlist) == tuple:
+                    # print(i)
+                    for dirslist in perlist:
+                        if type(dirslist) == list:
+                            for dirs in dirslist:
+                                # print(dirs)
+                                reit(dirs,vol,perlist)
+                        else:
+                            # print(dirslist)
+                            reit(dirslist,vol,perlist)
+                else:
+                    # print(perlist)
+                    reit(perlist,vol,perlist)
+        else:
+            pass
+    print('检测完毕！')
+
+if __name__ == '__main__':
+    try:
+        findsonmethings()
+    except Exception as e:
+        print(e)
